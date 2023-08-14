@@ -1,0 +1,61 @@
+# https://github.com/BililiveRecorder/BililiveRecorder/blob/dev/.github/workflows/release.yml
+name: Release
+
+on:
+  release:
+    types: [published]
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  release_cli:
+    strategy:
+      matrix:
+        rid: [win-x64]
+        build_configuration: [Release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - uses: actions/setup-dotnet@v3
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1
+      - name: Restore Packages
+        run: msbuild -t:restore /v:m League api.csproj
+
+      - name: Build CLI
+        if: ${{ matrix.rid == 'any' }}
+        run: dotnet publish -c ${{ matrix.build_configuration }} League api.csproj
+      - name: Build CLI
+        if: ${{ matrix.rid != 'any' }}
+        run: dotnet publish -c ${{ matrix.build_configuration }} -r ${{ matrix.rid }} League api.csproj
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: CLI-${{ matrix.rid }}-${{ matrix.build_configuration }}
+          path: publish/${{ matrix.rid }}/Release
+
+      - name: Pack Release Asset
+        run: |
+          cd publish/${{ matrix.rid }}/Release
+          zip -r /tmp/CLI-${{ matrix.rid }}-${{ matrix.build_configuration }}.zip .
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1 # This action was deprecated, but it still works
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: /tmp/CLI-${{ matrix.rid }}-${{ matrix.build_configuration }}.zip
+          asset_name: ${{ matrix.rid }}.zip
+          asset_content_type: application/zip

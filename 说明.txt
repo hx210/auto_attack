@@ -1,0 +1,5 @@
+需要HtmlAgilityPack和Newtonsoft.Json
+
+通过API  https://127.0.0.1:2999/liveclientdata/allgamedata获取玩家攻击速度
+
+调用League.dll导出的Sendkey()实现模拟按键
