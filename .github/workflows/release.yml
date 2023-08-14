@@ -42,8 +42,15 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: CLI-${{ matrix.rid }}-${{ matrix.build_configuration }}
-          path: publish/${{ matrix.rid }}/Release
+          name: publish-${{ matrix.rid }}-${{ matrix.build_configuration }}
+          path: publish
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            name: bin-${{ matrix.rid }}-${{ matrix.build_configuration }}
+            path: bin
+
 
       - name: Pack Release Asset
         run: |
