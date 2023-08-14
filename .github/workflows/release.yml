@@ -30,14 +30,14 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1
       - name: Restore Packages
-        run: msbuild -t:restore /v:m League api.csproj
+        run: msbuild -t:restore /v:m League_api.csproj
 
       - name: Build CLI
         if: ${{ matrix.rid == 'any' }}
-        run: dotnet publish -c ${{ matrix.build_configuration }} League api.csproj
+        run: dotnet publish -c ${{ matrix.build_configuration }} League_api.csproj
       - name: Build CLI
         if: ${{ matrix.rid != 'any' }}
-        run: dotnet publish -c ${{ matrix.build_configuration }} -r ${{ matrix.rid }} League api.csproj
+        run: dotnet publish -c ${{ matrix.build_configuration }} -r ${{ matrix.rid }} League_api.csproj
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
